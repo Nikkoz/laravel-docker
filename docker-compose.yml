@@ -12,6 +12,7 @@ networks:
 #Volumes
 volumes:
   redis-data:
+  postgresdb-data:
 
 services:
   #PHP Service
@@ -97,6 +98,8 @@ services:
     image: ${COMPOSE_PROJECT_NAME}_postgresdb
     container_name: ${COMPOSE_PROJECT_NAME}_postgresdb
     #restart: always
+    volumes:
+      - postgresdb-data:/var/lib/postgresql/data:rw
     environment:
       POSTGRES_USER: *postgresdb-username
       POSTGRES_DB: *postgresdb-db-name

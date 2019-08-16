@@ -71,7 +71,7 @@ down:
 	@docker-compose -f docker-compose.yml -p $project_name down
 
 start:
-	@docker-compose -f docker-compose.yml start
+	@docker-compose -f docker-compose.yml -p $project_name start
 
 migrate:
 	@echo -e "Make: Database migration.\n"
@@ -122,6 +122,9 @@ helper-generate:
 bash:
 	@docker exec -it "${COMPOSE_PROJECT_NAME}_app" bash
 
+bash-node:
+	@docker exec -it "${COMPOSE_PROJECT_NAME}_node" bash
+
 perm:
 	sudo chgrp -R www-data storage bootstrap/cache
 	sudo chmod -R ug+rwx storage bootstrap/cache
@@ -130,10 +133,10 @@ assets-install:
 	@docker-compose exec "$(NODE_CONTAINER_NAME)" yarn install
 
 assets-rebuild:
-	@docker-compose exec "$(NODE_CONTAINER_NAME)" npm rebuild node-sass --force
+	@docker exec -it "${COMPOSE_PROJECT_NAME}_node" sh -c "npm rebuild node-sass --force"
 
 assets-dev:
-	@docker-compose exec "$(NODE_CONTAINER_NAME)" yarn run dev
+	@docker exec -it "${COMPOSE_PROJECT_NAME}_node" sh -c "yarn run dev"
 
 assets-watch:
 	@docker-compose exec "$(NODE_CONTAINER_NAME)" yarn run watch
