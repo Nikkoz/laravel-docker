@@ -26,14 +26,19 @@ RUN apt-get -qq update && apt-get -qq install -y \
 # Clear cache
 RUN rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update -yqq && \
+    apt-get install -y apt-utils && \
+    pecl channel-update pecl.php.net
+
 RUN apt-get update && apt-get install -y wget git unzip \
-    && pecl install xdebug-2.7.1 \
+    && pecl install xdebug-2.9.0 \
     && docker-php-ext-enable xdebug
 
 # Install extensions
 RUN docker-php-ext-install pdo pdo_pgsql zip mbstring tokenizer bcmath
+RUN docker-php-ext-install -j$(nproc) iconv
 RUN docker-php-ext-configure gd --with-gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ --with-png-dir=/usr/include/
-RUN docker-php-ext-install gd
+RUN docker-php-ext-install -j$(nproc) gd
 
 # Install composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin/ --filename=composer

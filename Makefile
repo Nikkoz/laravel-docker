@@ -53,16 +53,16 @@ prepare-app: composer-install env key-generate #cert-generate
 
 install:
 	@echo -e "Make: Installing Laravel...\n"
-	@docker exec -it "${COMPOSE_PROJECT_NAME}_app"  sh -c "composer create-project --prefer-dist laravel/laravel ./laravel"
+	@docker exec -it "${COMPOSE_PROJECT_NAME}_app_1"  sh -c "composer create-project --prefer-dist laravel/laravel ./laravel"
 
 clear-folder:
 	@echo -e "Make: Clearing installation folder...\n"
-	@docker exec -it "${COMPOSE_PROJECT_NAME}_app"  sh -c "mv ./laravel/* ./ && rm -rf ./laravel"
+	@docker exec -it "${COMPOSE_PROJECT_NAME}_app_1"  sh -c "mv ./laravel/* ./ && rm -rf ./laravel"
 
 clean:
 	@docker system prune --volumes --force
 
-up:
+up: memory
 	@echo -e "Make: Up containers.\n"
 	@docker-compose -f docker-compose.yml -p $project_name up -d --force-recreate
 	@echo -e "Make: Visit https://${VIRTUAL_HOST} .\n"
@@ -77,13 +77,16 @@ migrate:
 	@echo -e "Make: Database migration.\n"
 	@docker-compose -f docker-compose.yml -p $project_name run app php artisan migrate --force
 
+tinker:
+	@docker-compose -f docker-compose.yml -p $project_name run app php artisan tinker
+
 db-seed:
 	@echo -e "Make: Database seeding.\n"
 	@docker-compose -f docker-compose.yml -p $project_name run app php artisan db:seed --force
 
 db-fresh:
 	@echo -e "Make: Fresh database.\n"
-	@docker exec -it "${COMPOSE_PROJECT_NAME}_app" sh -c "php artisan migrate:fresh --seed --force"
+	@docker exec -it "${COMPOSE_PROJECT_NAME}_app_1" sh -c "php artisan migrate:fresh --seed --force"
 
 logs:
 	@docker-compose -f docker-compose.yml -p $project_name logs --follow
@@ -91,16 +94,16 @@ logs:
 stop:
 	@docker-compose -f docker-compose.yml -p $project_name stop
 
-build:
+build: memory
 	@docker-compose -f docker-compose.yml -p $project_name build
 
 composer-install:
 	@echo -e "Make: Installing composer dependencies.\n"
-	@docker exec -it "${COMPOSE_PROJECT_NAME}_app" sh -c "composer install"
+	@docker exec -it "${COMPOSE_PROJECT_NAME}_app_1" sh -c "composer install"
 
 composer-update:
 	@echo -e "Make: Installing composer dependencies.\n"
-	@docker exec -it "${COMPOSE_PROJECT_NAME}_app" sh -c "composer update"
+	@docker exec -it "${COMPOSE_PROJECT_NAME}_app_1" sh -c "composer update"
 
 env:
 	@echo -e "Make: Сopying env file.\n"
@@ -108,7 +111,7 @@ env:
 
 key-generate:
 	@echo -e "Make: Generate Laravel key.\n"
-	@docker exec -it "${COMPOSE_PROJECT_NAME}_app" sh -c "php artisan key:generate"
+	@docker exec -it "${COMPOSE_PROJECT_NAME}_app_1" sh -c "php artisan key:generate"
 
 #cert-generate:
 #	@echo -e "Make: Generate self-sign certifications.\n"
@@ -117,26 +120,39 @@ key-generate:
 #	@mv ./${VIRTUAL_HOST}-key.pem ./storage/certs/${VIRTUAL_HOST}.key
 
 helper-generate:
-	@docker exec -it "${COMPOSE_PROJECT_NAME}_app" sh -c "php artisan ide-helper:eloquent && php artisan ide-helper:generate && php artisan ide-helper:meta && php artisan ide-helper:models"
+	@docker exec -it "${COMPOSE_PROJECT_NAME}_app_1" sh -c "php artisan ide-helper:eloquent && php artisan ide-helper:generate && php artisan ide-helper:meta && php artisan ide-helper:models"
+
+apidoc-generate:
+	@echo -e "Make: Generate docs for api.\n"
+	@docker exec -it "${COMPOSE_PROJECT_NAME}_app_1" sh -c "php artisan apidoc:generate"
 
 bash:
-	@docker exec -it "${COMPOSE_PROJECT_NAME}_app" bash
+	@docker exec -it "${COMPOSE_PROJECT_NAME}_app_1" bash
 
 bash-node:
-	@docker exec -it "${COMPOSE_PROJECT_NAME}_node" bash
+	@docker exec -it "${COMPOSE_PROJECT_NAME}_node_1" bash
 
 perm:
 	sudo chgrp -R www-data storage bootstrap/cache
 	sudo chmod -R ug+rwx storage bootstrap/cache
 
+test:
+	@docker exec -it "${COMPOSE_PROJECT_NAME}_app_1" sh -c "./vendor/phpunit/phpunit/phpunit"
+
+horizon:
+	@docker exec -it "${COMPOSE_PROJECT_NAME}_app_1" sh -c "php artisan horizon"
+
 assets-install:
 	@docker-compose exec "$(NODE_CONTAINER_NAME)" yarn install
 
 assets-rebuild:
-	@docker exec -it "${COMPOSE_PROJECT_NAME}_node" sh -c "npm rebuild node-sass --force"
+	@docker exec -it "${COMPOSE_PROJECT_NAME}_node_1" sh -c "npm rebuild node-sass --force"
 
 assets-dev:
-	@docker exec -it "${COMPOSE_PROJECT_NAME}_node" sh -c "yarn run dev"
+	@docker exec -it "${COMPOSE_PROJECT_NAME}_node_1" sh -c "yarn run dev"
 
 assets-watch:
-	@docker-compose exec "$(NODE_CONTAINER_NAME)" yarn run watch
+	@docker exec -it "${COMPOSE_PROJECT_NAME}_node_1" sh -c "yarn run watch"
+
+memory:
+	sudo sysctl -w vm.max_map_count=262144

@@ -21,7 +21,7 @@ services:
       context: ./
       dockerfile: docker/Dockerfile
     image: ${COMPOSE_PROJECT_NAME}_app
-    container_name: ${COMPOSE_PROJECT_NAME}_app
+    container_name: ${COMPOSE_PROJECT_NAME}_app_1
     #user: "${USER_ID:-1000}:${GROUP_ID:-1000}"
     #restart: unless-stopped
     #hostname: *app-service
@@ -55,7 +55,7 @@ services:
   #Nginx Service
   &nginx-service nginx:
     image: nginx:alpine
-    container_name: ${COMPOSE_PROJECT_NAME}_nginx
+    container_name: ${COMPOSE_PROJECT_NAME}_nginx_1
     #restart: always
     ports:
       - "8089:80"
@@ -96,7 +96,7 @@ services:
       context: ./
       dockerfile: docker/postgresdb/Dockerfile
     image: ${COMPOSE_PROJECT_NAME}_postgresdb
-    container_name: ${COMPOSE_PROJECT_NAME}_postgresdb
+    container_name: ${COMPOSE_PROJECT_NAME}_postgresdb_1
     #restart: always
     volumes:
       - postgresdb-data:/var/lib/postgresql/data:rw
@@ -113,7 +113,7 @@ services:
       context: ./
       dockerfile: docker/node/Dockerfile
     image: node
-    container_name: ${COMPOSE_PROJECT_NAME}_node
+    container_name: ${COMPOSE_PROJECT_NAME}_node_1
     ports:
       - "3000:3000"
     tty: true
@@ -124,7 +124,7 @@ services:
 
   redis:
     image: redis:4.0.11-alpine
-    container_name: ${COMPOSE_PROJECT_NAME}_redis
+    container_name: ${COMPOSE_PROJECT_NAME}_redis_1
     restart: always
     command: redis-server
     volumes:
