@@ -107,7 +107,7 @@ composer-update:
 
 env:
 	@echo -e "Make: Сopying env file.\n"
-	cp ./docker/example/.env.example ./.env
+	@docker exec -it "${COMPOSE_PROJECT_NAME}_app_1" sh -c "test -f ./.env || cp ./docker/example/.env.example ./.env"
 
 key-generate:
 	@echo -e "Make: Generate Laravel key.\n"
