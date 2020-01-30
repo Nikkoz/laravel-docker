@@ -1,4 +1,4 @@
-FROM php:7.3-fpm
+FROM php:7.3.13-fpm-alpine
 
 # Install dependencies
 RUN apt-get -qq update && apt-get -qq install -y \

@@ -123,7 +123,7 @@ services:
       - project-network
 
   redis:
-    image: redis:4.0.11-alpine
+    image: redis:5.0.7-alpine
     container_name: ${COMPOSE_PROJECT_NAME}_redis_1
     restart: always
     command: redis-server
