@@ -1,0 +1,3 @@
+FROM nginx:1.17
+
+ARG CURRENT_USER

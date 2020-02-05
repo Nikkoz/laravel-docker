@@ -3,7 +3,9 @@
 * docker-compose
 
 #### Install Laravel
-1. Set env variables in docker.env
+1. Prepare .env file:
+- ```make copy-env```
+- Set env variables in .env
 2. ```make laravel-install```
 3. There may be a problem with folder resolution. Run this: ```sudo chmod a+rw -R ./```  
 4. ```make laravel-init```

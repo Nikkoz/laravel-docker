@@ -1,1 +1,3 @@
-FROM postgres:11.1
+FROM postgres:11.5
+
+ARG CURRENT_USER
